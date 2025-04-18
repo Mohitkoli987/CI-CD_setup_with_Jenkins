@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Menshut{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+        <h2 class="text-center mb-4">Login</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Login</button>
+
+           
+            <div class="text-center mt-2">
+                <p>Don't have an account? <a href="{{ url_for('register') }}" class="text-decoration-none">Sign Up</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

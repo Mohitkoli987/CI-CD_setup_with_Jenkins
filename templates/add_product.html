@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Product - Menshut{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <h2 class="text-center mb-4">Add Product</h2>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">Product Name:</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter product name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Price:</label>
+                    <input type="number" name="price" class="form-control" placeholder="Enter product price" required step="0.01" min="0">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Product Description:</label>
+                    <textarea name="description" class="form-control" placeholder="Enter product description" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Select Category:</label>
+                    <select name="category" class="form-select" required>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Home & Kitchen">Home & Kitchen</option>
+                        <option value="Beauty">Beauty</option>
+                        <option value="Sports">Sports</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Upload Image:</label>
+                    <input type="file" name="image" accept="image/*" id="imageUpload" class="form-control" required>
+                </div>
+
+                <!-- Image Preview -->
+                <div class="text-center mb-3">
+                    <img id="imagePreview" src="" alt="Image Preview" class="img-fluid rounded d-none" style="max-height: 200px;">
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">Add Product</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Image Preview -->
+<script>
+    document.getElementById("imageUpload").addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById("imagePreview");
+                preview.src = e.target.result;
+                preview.classList.remove("d-none");
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

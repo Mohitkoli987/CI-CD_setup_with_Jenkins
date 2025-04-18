@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Menshut{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4 display-4 fw-bold">Welcome to Menshut</h1>
+
+    <!-- Recommended Products Section -->
+    <h2 class="mb-3">Recommended Products</h2>
+    {% if recommended_products %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for product in recommended_products %}
+                <div class="col">
+                    <div class="card product-card shadow-hover h-100">
+                        <div class="img-wrapper">
+                            {% if product.image and product.image.startswith('http') %}
+                                <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" onerror="this.src='/static/default-product.jpg'">
+                            {% elif product.image %}
+                                <img src="{{ url_for('static', filename='uploads/' + product.image) }}" class="card-img-top" alt="{{ product.name }}" onerror="this.src='/static/default-product.jpg'">
+                            {% else %}
+                                <img src="/static/default-product.jpg" class="card-img-top" alt="{{ product.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="card-body text-center d-flex flex-column">
+                            <h5 class="card-title text-truncate mb-2">{{ product.name }}</h5>
+                            <p class="card-text text-success fw-bold mb-3">₹{{ product.price }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">No recommended products available.</p>
+    {% endif %}
+
+    <!-- Categorized Products -->
+    {% for category, products in categorized_products.items() %}
+        <h2 class="mt-5">{{ category }}</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for product in products %}
+                <div class="col">
+                    <div class="card product-card shadow-hover h-100">
+                        <div class="img-wrapper">
+                            {% if product.image and product.image.startswith('http') %}
+                                <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" onerror="this.src='/static/default-product.jpg'">
+                            {% elif product.image %}
+                                <img src="{{ url_for('static', filename='uploads/' + product.image) }}" class="card-img-top" alt="{{ product.name }}" onerror="this.src='/static/default-product.jpg'">
+                            {% else %}
+                                <img src="/static/default-product.jpg" class="card-img-top" alt="{{ product.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="card-body text-center d-flex flex-column">
+                            <h5 class="card-title text-truncate mb-2">{{ product.name }}</h5>
+                            <p class="card-text text-muted description-text">{{ product.description }}</p>
+                            <p class="text-dark fw-bold price-text mb-3">₹{{ product.price }}</p>
+
+                            {% if product.seller_name %}
+                            <p class="text-muted"><strong>Seller:</strong> {{ product.seller_name }}</p>
+                        {% endif %}
+                    
+
+                            <!-- Wishlist Heart Button -->
+                            <i class="wishlist-icon fa fa-heart {% if product.id in wishlist_items %}active{% else %}inactive{% endif %}"
+                               data-product-id="{{ product.id }}"></i>
+
+                            <!-- Order Button -->
+                            {% if session.get('user_id') %}
+                                <a href="{{ url_for('order_product', product_id=product.id) }}" class="btn btn-success w-100">
+                                    Order Now
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('login') }}" class="btn btn-primary w-100">
+                                    Login to Order
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Chatbot UI -->
+<div id="chat-container">
+    <button id="chat-toggle">💬 Chat</button>
+    <div id="chatbox">
+        <div id="chat-header">
+            <span>Chat with us</span>
+            <button id="close-chat">✖</button>
+        </div>
+        <div id="chat-messages"></div>
+        <div id="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Ask me something...">
+            <button id="send-chat">Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- Chatbot Styling -->
+<style>
+    /* Product Cards Styling */
+    .product-card {
+        transition: all 0.3s ease;
+        border: none;
+        background: #fff;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    .img-wrapper {
+        height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        background: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+        padding: 15px;
+    }
+
+    .card-img-top {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .description-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.8em;
+    }
+
+    .price-text {
+        font-size: 1.2rem;
+        color: #2c3e50;
+    }
+
+    .btn-success, .btn-primary {
+        border-radius: 25px;
+        padding: 8px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover, .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .wishlist-icon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: white;
+        padding: 8px;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 20px;
+        color: #666;
+    }
+
+    .wishlist-icon.active {
+        color: red;
+    }
+
+    .wishlist-icon.inactive {
+        color: gray;
+    }
+
+    .wishlist-icon:hover {
+        transform: scale(1.1);
+    }
+
+    /* Category Headers */
+    h2 {
+        position: relative;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+        color: #2c3e50;
+    }
+
+    h2:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: #007bff;
+        border-radius: 3px;
+    }
+    #chat-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+    #chat-toggle {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    #chatbox {
+        display: none;
+        width: 300px;
+        height: 400px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+    #chat-header {
+        background: #007bff;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+        position: relative;
+    }
+    #close-chat {
+        position: absolute;
+        right: 10px;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+    }
+    #chat-messages {
+        height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+    }
+    #chat-messages p {
+        margin: 5px 0;
+        padding: 8px;
+        border-radius: 5px;
+    }
+    .user-message {
+        align-self: flex-end;
+        background: #007bff;
+        color: white;
+    }
+    .bot-message {
+        align-self: flex-start;
+        background: #f1f1f1;
+    }
+    #chat-input-container {
+        display: flex;
+        border-top: 1px solid #ccc;
+        padding: 5px;
+    }
+    #chat-input {
+        flex: 1;
+        padding: 5px;
+        border: none;
+    }
+    #send-chat {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+</style>
+
+<!-- JavaScript for Wishlist and Chatbot -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".wishlist-icon").forEach(icon => {
+        icon.addEventListener("click", function () {
+            let productId = this.dataset.productId;
+            fetch(`/wishlist/${productId}`, { method: "POST" })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.login_required) {
+                        window.location.href = "/login";  // Redirect to login
+                    } else if (data.status === "added") {
+                        this.style.color = "red";  // Wishlist item added
+                    } else if (data.status === "removed") {
+                        this.style.color = "gray";  // Wishlist item removed
+                    }
+                });
+        });
+    });
+
+    // Chatbot functionality
+    document.getElementById("chat-toggle").addEventListener("click", function () {
+        document.getElementById("chatbox").style.display = "block";
+    });
+
+    document.getElementById("close-chat").addEventListener("click", function () {
+        document.getElementById("chatbox").style.display = "none";
+    });
+
+    document.getElementById("send-chat").addEventListener("click", function () {
+        let userInput = document.getElementById("chat-input").value;
+        let chatMessages = document.getElementById("chat-messages");
+
+        if (userInput.trim() === "") return;
+
+        // Display user message
+        let userMsg = document.createElement("p");
+        userMsg.textContent = userInput;
+        userMsg.classList.add("user-message");
+        chatMessages.appendChild(userMsg);
+
+        fetch("/chatbot", {
+            method: "POST",
+            body: JSON.stringify({ message: userInput }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            let botMsg = document.createElement("p");
+            botMsg.textContent = data.response;
+            botMsg.classList.add("bot-message");
+            chatMessages.appendChild(botMsg);
+        });
+
+        document.getElementById("chat-input").value = "";
+    });
+});
+</script>
+
+{% endblock %}
