@@ -5,16 +5,16 @@ from flask import send_from_directory
 from werkzeug.utils import secure_filename
 from sklearn.neighbors import NearestNeighbors
 import pandas as pd
-import openai
+# import openai
 from dotenv import load_dotenv
 import google.generativeai as genai
 import requests
 
 # Load .env variables
 load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = "gemini-1.5-flash"  # Or "gemini-1.5-pro" based on your needs
-GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+# GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# GEMINI_MODEL = "gemini-1.5-flash"  # Or "gemini-1.5-pro" based on your needs
+# GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
 
 genai.configure(api_key=GEMINI_API_KEY)
 app = Flask(__name__)
